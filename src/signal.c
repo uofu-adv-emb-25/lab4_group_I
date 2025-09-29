@@ -7,28 +7,27 @@ void signal_handle_calculation(SemaphoreHandle_t request, SemaphoreHandle_t resp
 
         data->output = data->input + 5;
 
-    xSemaphoreGive(response, portMAX_DELAY);
+    xSemaphoreGive(response);
 
     xSemaphoreTake(response, portMAX_DELAY);
 
-    xSemaphoreGive(request, portMAX_DELAY);
+    xSemaphoreGive(request);
     
     
 }
 
 BaseType_t signal_request_calculate(SemaphoreHandle_t request, SemaphoreHandle_t response, struct signal_data *data)
 {
-    BaseType_t result = 0;
 
-    xSemaphoreGive(request, portMAX_DELAY);
+    xSemaphoreGive(request);
 
-    xSemaphoreTake(response, portMAX_DELAY);
+    if (!xSemaphoreTake(response, portMAX_DELAY))
+        return 0;
 
-    result = signalData -> output;
+    xSemaphoreGive(response);
 
-    xSemaphoreGive(response, portMAX_DELAY);
+    if (!xSemaphoreTake(request, portMAX_DELAY))
+        return 0;
 
-    xSemaphoreTake(request, portMAX_DELAY);
-
-    return result;
+    return 1;
 }
